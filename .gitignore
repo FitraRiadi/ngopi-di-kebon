@@ -6,6 +6,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+prompt.md
+business-info.md
 
 node_modules
 .opencode

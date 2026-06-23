@@ -99,7 +99,7 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Ngopi Di Kebon. Hak cipta dilindungi.
           </p>
           <p className="text-beige/50 text-xs flex items-center gap-1">
-            Dibuat dengan <HiHeart className="text-gold" /> di Bandung
+            Ngopi Di Kebon Website
           </p>
         </div>
       </div>

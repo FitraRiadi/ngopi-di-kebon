@@ -17,8 +17,12 @@ const images = [
 export default function SuasanaCarousel() {
   const sectionRef = useRef(null)
   const titleRef = useRef(null)
+  const trackRef = useRef(null)
+  const offsetRef = useRef(0)
+  const rafRef = useRef(null)
 
   useEffect(() => {
+    // ── GSAP title animation ──────────────────────────
     const ctx = gsap.context(() => {
       gsap.fromTo(
         titleRef.current,
@@ -36,7 +40,42 @@ export default function SuasanaCarousel() {
         }
       )
     }, sectionRef)
-    return () => ctx.revert()
+
+    // ── Carousel auto-scroll ──────────────────────────
+    const speed = 1.5 // ← ubah ini: kecil = lambat, besar = cepat
+
+    const tick = () => {
+      const track = trackRef.current
+      if (!track) return
+
+      offsetRef.current -= speed
+
+      const halfWidth = track.scrollWidth / 2
+      if (Math.abs(offsetRef.current) >= halfWidth) {
+        offsetRef.current = 0
+      }
+
+      track.style.transform = `translateX(${offsetRef.current}px)`
+      rafRef.current = requestAnimationFrame(tick)
+    }
+
+    rafRef.current = requestAnimationFrame(tick)
+
+    // Pause saat tab tidak aktif
+    const handleVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(rafRef.current)
+      } else {
+        rafRef.current = requestAnimationFrame(tick)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      ctx.revert()
+      cancelAnimationFrame(rafRef.current)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [])
 
   return (
@@ -45,7 +84,8 @@ export default function SuasanaCarousel() {
       ref={sectionRef}
       className="relative py-16 sm:py-20 bg-espresso overflow-hidden"
     >
-      <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+      <div
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
           backgroundImage: 'url("https://images.unsplash.com/photo-1498804103079-a6351b050096?w=1600&q=80")',
           backgroundSize: 'cover',
@@ -63,8 +103,12 @@ export default function SuasanaCarousel() {
         </h2>
       </div>
 
-      <div className="relative w-full overflow-hidden py-2 grupo-scroll">
-        <div className="flex gap-4 animate-scroll">
+      <div className="relative w-full overflow-hidden py-2">
+        <div
+          ref={trackRef}
+          className="flex gap-4"
+          style={{ willChange: 'transform' }}
+        >
           {[...images, ...images].map((img, idx) => (
             <div
               key={idx}
