@@ -1,5 +1,5 @@
 import { Camera, Mesh, Plane, Program, Renderer, Texture, Transform } from 'ogl';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import './CircularGallery.css';
 
 function debounce(func, wait) {
@@ -338,9 +338,6 @@ class App {
     this.onItemClick = onItemClick;
     this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0 };
     this.onCheckDebounce = debounce(this.onCheck, 200);
-    // track pointer movement to distinguish drag vs click
-    this._pointerDownX = 0;
-    this._pointerDownY = 0;
     this._didDrag = false;
     this.createRenderer();
     this.createCamera();
@@ -377,39 +374,19 @@ class App {
     }));
   }
 
-  // ── Pointer tracking: distinguish tap vs drag ──────────────────────────
+  // ── Tap only: no drag ──────────────────────────────────────────────────
   onTouchDown(e) {
     this.isDown = true;
-    this._didDrag = false;
-    this.scroll.position = this.scroll.current;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    this.start = clientX;
-    this._lastX = clientX;          // track previous frame X for per-frame delta
-    this._pointerDownX = clientX;
-    this._pointerDownY = clientY;
+    this._tapX = e.touches ? e.touches[0].clientX : e.clientX;
   }
   onTouchMove(e) {
+    // no drag — just track to prevent accidental tap after movement
     if (!this.isDown) return;
-    const isTouch = !!e.touches;
-    const x = isTouch ? e.touches[0].clientX : e.clientX;
-    const y = isTouch ? e.touches[0].clientY : e.clientY;
-    const dx = Math.abs(x - this._pointerDownX);
-    const dy = Math.abs(y - this._pointerDownY);
-    if (dx > 6 || dy > 6) this._didDrag = true;
-
-    // Use per-frame delta so the gallery tracks the finger 1:1
-    // Touch gets a higher multiplier for responsive feel on mobile;
-    // mouse keeps a smaller one to stay controlled.
-    const frameDelta = this._lastX - x;
-    const multiplier = isTouch ? 1.8 : 0.4;
-    this.scroll.target += frameDelta * multiplier;
-    this._lastX = x;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    if (Math.abs(x - this._tapX) > 10) this._didDrag = true;
   }
   onTouchUp(e) {
     this.isDown = false;
-    this.onCheck();
-    // Only fire click if this was a tap, not a drag
     if (!this._didDrag && this.onItemClick) {
       const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
       this._fireClickAtX(clientX);
@@ -435,6 +412,19 @@ class App {
     const itemIndex = Math.round(Math.abs(this.scroll.target) / width);
     const item = width * itemIndex;
     this.scroll.target = this.scroll.target < 0 ? -item : item;
+  }
+
+  prev() {
+    if (!this.medias || !this.medias[0]) return;
+    const width = this.medias[0].width;
+    this.scroll.target += width;
+    this.onCheckDebounce();
+  }
+  next() {
+    if (!this.medias || !this.medias[0]) return;
+    const width = this.medias[0].width;
+    this.scroll.target -= width;
+    this.onCheckDebounce();
   }
 
   // ── Accurate click: find which media plane is closest to the click X ──
@@ -487,28 +477,20 @@ class App {
   }
   addEventListeners() {
     this.boundOnResize = this.onResize.bind(this);
-    this.boundOnWheel = this.onWheel.bind(this);
     this.boundOnTouchDown = this.onTouchDown.bind(this);
     this.boundOnTouchMove = this.onTouchMove.bind(this);
     this.boundOnTouchUp = this.onTouchUp.bind(this);
-    this.boundOnKeyDown = this.onKeyDown.bind(this);
     window.addEventListener('resize', this.boundOnResize);
-    window.addEventListener('mousewheel', this.boundOnWheel);
-    window.addEventListener('wheel', this.boundOnWheel);
-    // use canvas directly for pointer events so we only react inside the gallery
     this.gl.canvas.addEventListener('mousedown', this.boundOnTouchDown);
     this.gl.canvas.addEventListener('mousemove', this.boundOnTouchMove);
     this.gl.canvas.addEventListener('mouseup', this.boundOnTouchUp);
     this.gl.canvas.addEventListener('touchstart', this.boundOnTouchDown, { passive: true });
     this.gl.canvas.addEventListener('touchmove', this.boundOnTouchMove, { passive: true });
     this.gl.canvas.addEventListener('touchend', this.boundOnTouchUp);
-    this.container?.addEventListener('keydown', this.boundOnKeyDown);
   }
   destroy() {
     window.cancelAnimationFrame(this.raf);
     window.removeEventListener('resize', this.boundOnResize);
-    window.removeEventListener('mousewheel', this.boundOnWheel);
-    window.removeEventListener('wheel', this.boundOnWheel);
     if (this.gl && this.gl.canvas) {
       this.gl.canvas.removeEventListener('mousedown', this.boundOnTouchDown);
       this.gl.canvas.removeEventListener('mousemove', this.boundOnTouchMove);
@@ -524,7 +506,7 @@ class App {
   }
 }
 
-export default function CircularGallery({
+const CircularGallery = forwardRef(function CircularGallery({
   items,
   bend = 3,
   textColor = '#ffffff',
@@ -534,8 +516,15 @@ export default function CircularGallery({
   scrollSpeed = 2,
   scrollEase = 0.05,
   onItemClick = null,
-}) {
+}, ref) {
   const containerRef = useRef(null);
+  const appRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    prev: () => appRef.current?.prev(),
+    next: () => appRef.current?.next(),
+  }), []);
+
   useEffect(() => {
     if (!containerRef.current) return;
     let app;
@@ -547,6 +536,7 @@ export default function CircularGallery({
         font: resolvedFont, scrollSpeed, scrollEase,
         onItemClick,
       });
+      appRef.current = app;
     });
     return () => {
       isMounted = false;
@@ -559,7 +549,9 @@ export default function CircularGallery({
       ref={containerRef}
       tabIndex={0}
       role="region"
-      aria-label="Circular image gallery. Use left and right arrow keys to navigate."
+      aria-label="Circular image gallery"
     />
   );
-}
+});
+
+export default CircularGallery;

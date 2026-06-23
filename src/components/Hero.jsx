@@ -13,9 +13,23 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1920&q=85',
   'https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=1920&q=85',
   'https://images.unsplash.com/photo-1470338745628-171cf53de3a8?w=1920&q=85',
+  'https://images.unsplash.com/photo-1559329007-40df8a9345d8?w=1920&q=85',
+  'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=1920&q=85',
+  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&q=85',
+  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920&q=85',
+  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&q=85',
+  'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1920&q=85',
 ]
 
-const SCENE_DOTS = [0.15, 0.4, 0.65, 0.88]
+const SCENE_DOTS = [0, 0.12, 0.30, 0.54, 0.75, 0.92]
+
+// Scene text helper: compute opacity for a progress range [in, out]
+function sceneOpacity(progress, inStart, inEnd, outStart, outEnd) {
+  if (progress < inStart || progress > outEnd) return 0
+  if (progress >= inEnd && progress <= outStart) return 1
+  if (progress < inEnd) return (progress - inStart) / (inEnd - inStart)
+  return 1 - (progress - outStart) / (outEnd - outStart)
+}
 
 // ─────────────────────────────────────────────
 // CANVAS DRAW (60 FPS Optimized)
@@ -267,6 +281,8 @@ export default function Hero({ onLoadProgress, onReady }) {
   const sectionRef  = useRef(null)
   const stickyRef   = useRef(null)
   const textRef     = useRef(null)
+  const scene1Ref   = useRef(null)
+  const scene2Ref   = useRef(null)
   const progressRef = useRef(null)
   const hintRef     = useRef(null)
   const dotsRef     = useRef([]) 
@@ -301,20 +317,28 @@ export default function Hero({ onLoadProgress, onReady }) {
       scrub: true, 
       anticipatePin: 1,
       onUpdate: (self) => {
-        scrollProgressRef.current = self.progress
+        const p = self.progress
+        scrollProgressRef.current = p
 
         if (progressRef.current) {
-          progressRef.current.style.width = `${self.progress * 100}%`
+          progressRef.current.style.width = `${p * 100}%`
         }
         
-        if (self.progress > 0.03 && hintRef.current) {
+        if (p > 0.03 && hintRef.current) {
           hintRef.current.style.opacity = '0'
         }
 
-        SCENE_DOTS.forEach((p, i) => {
+        if (scene1Ref.current) {
+          scene1Ref.current.style.opacity = sceneOpacity(p, 0.06, 0.18, 0.38, 0.50)
+        }
+        if (scene2Ref.current) {
+          scene2Ref.current.style.opacity = sceneOpacity(p, 0.48, 0.60, 0.78, 0.88)
+        }
+
+        SCENE_DOTS.forEach((dotPos, i) => {
           const dot = dotsRef.current[i]
           if (dot) {
-            const isNear = Math.abs(self.progress - p) < 0.15
+            const isNear = Math.abs(p - dotPos) < 0.12
             dot.style.height = isNear ? '22px' : '6px'
             dot.style.background = isNear ? '#C8860A' : 'rgba(240,232,213,0.25)'
           }
@@ -434,6 +458,60 @@ export default function Hero({ onLoadProgress, onReady }) {
                 Kunjungi Kami
               </button>
             </motion.div>
+          </div>
+
+          {/* Scene overlay 1 — kanan bawah */}
+          <div ref={scene1Ref} style={{
+            position: 'absolute', right: 'clamp(20px, 5vw, 60px)',
+            bottom: 'clamp(80px, 12vh, 140px)',
+            zIndex: 10, opacity: 0, pointerEvents: 'none',
+            maxWidth: 'min(380px, 65vw)',
+            textAlign: 'right', transition: 'opacity 0.15s ease',
+          }}>
+            <span style={{
+              fontSize: '11px', letterSpacing: '0.25em',
+              color: '#C8860A', textTransform: 'uppercase',
+              display: 'block', marginBottom: '8px',
+            }}>
+              Nikmati Suasana
+            </span>
+            <p style={{
+              fontFamily: 'Georgia, serif',
+              fontSize: 'clamp(13px, 1.5vw, 17px)',
+              color: 'rgba(240,232,213,0.9)',
+              lineHeight: 1.7, fontWeight: 300,
+            }}>
+              Restoran tenang dengan interior hangat &amp; area makan outdoor
+              dikelilingi tanaman hijau subur. Pemandangan citylight Bandung
+              dari atas bukit Cimenyan.
+            </p>
+          </div>
+
+          {/* Scene overlay 2 — kiri bawah */}
+          <div ref={scene2Ref} style={{
+            position: 'absolute', left: 'clamp(20px, 5vw, 60px)',
+            bottom: 'clamp(80px, 12vh, 140px)',
+            zIndex: 10, opacity: 0, pointerEvents: 'none',
+            maxWidth: 'min(380px, 65vw)',
+            textAlign: 'left', transition: 'opacity 0.15s ease',
+          }}>
+            <span style={{
+              fontSize: '11px', letterSpacing: '0.25em',
+              color: '#C8860A', textTransform: 'uppercase',
+              display: 'block', marginBottom: '8px',
+            }}>
+              Berkumpul &amp; Bersantai
+            </span>
+            <p style={{
+              fontFamily: 'Georgia, serif',
+              fontSize: 'clamp(13px, 1.5vw, 17px)',
+              color: 'rgba(240,232,213,0.9)',
+              lineHeight: 1.7, fontWeight: 300,
+            }}>
+              Tempat sempurna untuk berkumpul bersama teman dan keluarga.
+              Ruang makan privat, area parkir luas, free Wi-Fi,
+              dan menu khusus anak tersedia.
+            </p>
           </div>
 
           {/* Progress bar */}

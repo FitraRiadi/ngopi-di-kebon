@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { HiX } from 'react-icons/hi'
+import { HiX, HiChevronLeft, HiChevronRight } from 'react-icons/hi'
 import { LuSend } from 'react-icons/lu'
 import CircularGallery from './CircularGallery'
 
@@ -100,11 +100,10 @@ export default function Menu() {
   const sectionRef = useRef(null)
   const titleRef = useRef(null)
   const hintRef = useRef(null)
+  const galleryRef = useRef(null)
   const isMobile = useIsMobile()
 
-  // Adaptive bend: gentle on mobile, full on desktop
   const bend = isMobile ? 1 : 3
-  // Slightly shorter gallery on mobile
   const galleryHeight = isMobile ? 320 : 500
 
   useEffect(() => {
@@ -141,11 +140,6 @@ export default function Menu() {
     document.body.style.overflow = selectedItem ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [selectedItem])
-
-  // onItemClick now receives the real index directly from CircularGallery
-  const handleItemClick = useCallback((realIndex) => {
-    setSelectedItem(galleryItems[realIndex])
-  }, [])
 
   const openWA = (item) => {
     const text = encodeURIComponent(
@@ -193,26 +187,40 @@ export default function Menu() {
           ref={hintRef}
           className="text-center text-espresso-light/60 text-xs mb-4 tracking-wide"
         >
-          {isMobile
-            ? 'Geser untuk menjelajahi · Ketuk kartu untuk memesan'
-            : 'Geser atau scroll untuk menjelajahi menu · Klik kartu untuk memesan'}
+          Ketuk kartu untuk melihat detail & memesan
         </p>
 
         {/* ── CircularGallery ── */}
-        <div
-          className="relative rounded-3xl overflow-hidden"
-          style={{ height: `${galleryHeight}px` }}
-        >
-          <CircularGallery
-            items={circularItems}
-            bend={bend}
-            textColor="#F5E6D3"
-            borderRadius={0.08}
-            scrollSpeed={isMobile ? 1.5 : 2}
-            scrollEase={0.025}
-            font={isMobile ? 'bold 16px serif' : 'bold 22px serif'}
-            onItemClick={handleItemClick}
-          />
+        <div className="relative">
+          <div
+            className="relative rounded-3xl overflow-hidden"
+            style={{ height: `${galleryHeight}px` }}
+          >
+            <CircularGallery
+              ref={galleryRef}
+              items={circularItems}
+              bend={bend}
+              textColor="#F5E6D3"
+              borderRadius={0.08}
+              scrollSpeed={2}
+              scrollEase={0.05}
+              font={isMobile ? 'bold 16px serif' : 'bold 22px serif'}
+              onItemClick={(i) => setSelectedItem(galleryItems[i])}
+            />
+
+            <button
+              onClick={() => galleryRef.current?.prev()}
+              className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-white/80 backdrop-blur-sm shadow-md hover:bg-white text-espresso transition-all cursor-pointer z-10"
+            >
+              <HiChevronLeft size={22} />
+            </button>
+            <button
+              onClick={() => galleryRef.current?.next()}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-white/80 backdrop-blur-sm shadow-md hover:bg-white text-espresso transition-all cursor-pointer z-10"
+            >
+              <HiChevronRight size={22} />
+            </button>
+          </div>
         </div>
 
         {/* ── Grid preview ── */}
