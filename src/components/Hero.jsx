@@ -185,7 +185,6 @@ function CinematicCanvas({ frames, scrollProgressRef, isLoaded }) {
 // ─────────────────────────────────────────────
 function useFrames() {
   const [frames, setFrames]             = useState([])
-  const [loadProgress, setLoadProgress] = useState(0)
   const [isLoaded, setIsLoaded]         = useState(false)
   const [isFallback, setIsFallback]     = useState(false)
 
@@ -193,7 +192,8 @@ function useFrames() {
     let localPaths = []
     
     try {
-      const context = import.meta.glob('/src/assets/frames-cafe-1/*.{jpg,jpeg,png,webp}', { eager: true })
+      // ✏️ Ganti '/src/assets/cinematic-frame' dengan folder kamu
+      const context = import.meta.glob('/src/assets/cinematic-frame/*.{jpg,jpeg,png,webp}', { eager: true })
       localPaths = Object.keys(context).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
     } catch (e) {
       localPaths = []
@@ -213,7 +213,6 @@ function useFrames() {
         img.onload = () => {
           results[index] = img
           loadedCount++
-          setLoadProgress(loadedCount / totalToLoad)
           if (loadedCount === totalToLoad) {
             setFrames(results.filter(Boolean))
             setIsLoaded(true)
@@ -240,7 +239,6 @@ function useFrames() {
         img.onload = () => {
           fallbackResults[i] = img
           fallbackLoaded++
-          setLoadProgress(fallbackLoaded / FALLBACK_IMAGES.length)
           if (fallbackLoaded === FALLBACK_IMAGES.length) {
             const expanded = Array.from({ length: TARGET_EXTENDED_FRAMES }, (_, fi) => {
               const srcIdx = Math.floor((fi / TARGET_EXTENDED_FRAMES) * FALLBACK_IMAGES.length)
@@ -271,13 +269,13 @@ function useFrames() {
     return () => clearTimeout(safetyTimer)
   }, [])
 
-  return { frames, loadProgress, isLoaded, isFallback }
+  return { frames, isLoaded, isFallback }
 }
 
 // ─────────────────────────────────────────────
 // MAIN HERO COMPONENT
 // ─────────────────────────────────────────────
-export default function Hero({ onLoadProgress, onReady }) {
+export default function Hero() {
   const sectionRef  = useRef(null)
   const stickyRef   = useRef(null)
   const textRef     = useRef(null)
@@ -290,15 +288,7 @@ export default function Hero({ onLoadProgress, onReady }) {
   const scrollProgressRef = useRef(0)
   const lenis = useLenis()
 
-  const { frames, loadProgress, isLoaded } = useFrames()
-
-  useEffect(() => {
-    onLoadProgress?.(loadProgress)
-  }, [loadProgress, onLoadProgress])
-
-  useEffect(() => {
-    if (isLoaded) onReady?.()
-  }, [isLoaded, onReady])
+  const { frames, isLoaded } = useFrames()
 
   useEffect(() => {
     if (!isLoaded) return
