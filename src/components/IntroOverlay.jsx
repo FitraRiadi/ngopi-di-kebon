@@ -1,15 +1,24 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function IntroOverlay({ onFinish }) {
+export default function IntroOverlay({ progress, onFinish }) {
   const [phase, setPhase] = useState('enter')
+  const pct = Math.min(Math.round((progress || 0) * 100), 100)
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase('hold'), 1200)
-    const t2 = setTimeout(() => setPhase('exit'), 2600)
-    const t3 = setTimeout(() => onFinish(), 3600)
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
-  }, [onFinish])
+    const t1 = setTimeout(() => setPhase('hold'), 800)
+    return () => clearTimeout(t1)
+  }, [])
+
+  useEffect(() => {
+    if (phase === 'hold' && pct >= 100) {
+      const t = setTimeout(() => {
+        setPhase('exit')
+        setTimeout(onFinish, 800)
+      }, 400)
+      return () => clearTimeout(t)
+    }
+  }, [phase, pct, onFinish])
 
   return (
     <AnimatePresence>
@@ -46,13 +55,20 @@ export default function IntroOverlay({ onFinish }) {
           </motion.p>
         </motion.div>
 
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: phase === 'hold' ? 1 : 0 }}
-          transition={{ duration: 1.4, ease: 'easeInOut' }}
-          className="absolute bottom-1/4 h-0.5 w-40 bg-gold/60 rounded-full origin-center"
-          style={{ transformOrigin: 'center center' }}
-        />
+        <div className="absolute bottom-1/4 flex flex-col items-center gap-3">
+          <p className="text-beige/40 text-[11px] tracking-[0.25em] uppercase">
+            Memuat tampilan {pct}%
+          </p>
+          <div className="h-0.5 w-40 bg-gold/15 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-gold/60 rounded-full"
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: pct / 100 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              style={{ transformOrigin: 'left center' }}
+            />
+          </div>
+        </div>
       </motion.div>
     </AnimatePresence>
   )

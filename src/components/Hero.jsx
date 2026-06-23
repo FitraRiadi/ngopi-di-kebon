@@ -179,17 +179,16 @@ function useFrames() {
     let localPaths = []
     
     try {
-      // 🚀 OTOMATIS: Membaca file gambar dari folder assets secara dinamis
-      // Silakan sesuaikan isi path folder di bawah ini dengan struktur projekmu (*.jpg / *.png / *.webp)
       const context = import.meta.glob('/src/assets/frames-cafe-1/*.{jpg,jpeg,png,webp}', { eager: true })
-      
-      // Ambil path string, lalu urutkan secara Ascending (A-Z atau nomor urut file)
       localPaths = Object.keys(context).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
     } catch (e) {
       localPaths = []
     }
 
-    // JIKA FOLDER ASLI DITEMUKAN DAN ADA GAMBARNYA
+    const forceLoaded = () => {
+      setIsLoaded(true)
+    }
+
     if (localPaths.length > 0) {
       const totalToLoad = localPaths.length
       const results = new Array(totalToLoad)
@@ -201,7 +200,6 @@ function useFrames() {
           results[index] = img
           loadedCount++
           setLoadProgress(loadedCount / totalToLoad)
-
           if (loadedCount === totalToLoad) {
             setFrames(results.filter(Boolean))
             setIsLoaded(true)
@@ -214,16 +212,13 @@ function useFrames() {
             setIsLoaded(true)
           }
         }
-        // Resolve URL path dari Vite asset module
         img.src = path
       })
-
     } else {
-      // ❌ JIKA TIDAK ADA/GAGAL DI-LOAD -> Pakai skema Fallback otomatis
       setIsFallback(true)
       let fallbackLoaded = 0
       const fallbackResults = []
-      const TARGET_EXTENDED_FRAMES = 60 
+      const TARGET_EXTENDED_FRAMES = 60
 
       FALLBACK_IMAGES.forEach((src, i) => {
         const img = new Image()
@@ -243,18 +238,23 @@ function useFrames() {
         }
         img.onerror = () => {
           fallbackLoaded++
-          if (fallbackLoaded === FALLBACK_IMAGES.length && fallbackResults.filter(Boolean).length) {
+          if (fallbackLoaded === FALLBACK_IMAGES.length) {
             const valid = fallbackResults.filter(Boolean)
-            const expanded = Array.from({ length: TARGET_EXTENDED_FRAMES }, (_, fi) => {
-              return valid[Math.floor((fi / TARGET_EXTENDED_FRAMES) * valid.length)]
-            })
-            setFrames(expanded)
+            if (valid.length) {
+              const expanded = Array.from({ length: TARGET_EXTENDED_FRAMES }, (_, fi) => {
+                return valid[Math.floor((fi / TARGET_EXTENDED_FRAMES) * valid.length)]
+              })
+              setFrames(expanded)
+            }
             setIsLoaded(true)
           }
         }
         img.src = src
       })
     }
+
+    const safetyTimer = setTimeout(forceLoaded, 10000)
+    return () => clearTimeout(safetyTimer)
   }, [])
 
   return { frames, loadProgress, isLoaded, isFallback }
@@ -263,7 +263,7 @@ function useFrames() {
 // ─────────────────────────────────────────────
 // MAIN HERO COMPONENT
 // ─────────────────────────────────────────────
-export default function Hero() {
+export default function Hero({ onLoadProgress, onReady }) {
   const sectionRef  = useRef(null)
   const stickyRef   = useRef(null)
   const textRef     = useRef(null)
@@ -274,23 +274,15 @@ export default function Hero() {
   const scrollProgressRef = useRef(0)
   const lenis = useLenis()
 
-  const { frames, loadProgress, isLoaded, isFallback } = useFrames()
+  const { frames, loadProgress, isLoaded } = useFrames()
 
-  // 🔒 Kunci Scroll Selama Proses Memuat Gambar (Loading)
   useEffect(() => {
-    if (!isLoaded) {
-      document.body.style.overflow = 'hidden'
-      lenis?.stop()
-    } else {
-      document.body.style.overflow = ''
-      lenis?.start()
-    }
+    onLoadProgress?.(loadProgress)
+  }, [loadProgress, onLoadProgress])
 
-    return () => {
-      document.body.style.overflow = ''
-      lenis?.start()
-    }
-  }, [isLoaded, lenis])
+  useEffect(() => {
+    if (isLoaded) onReady?.()
+  }, [isLoaded, onReady])
 
   useEffect(() => {
     if (!isLoaded) return
@@ -373,35 +365,6 @@ export default function Hero() {
           ref={stickyRef}
           style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}
         >
-
-          {/* Preloader */}
-          {!isLoaded && (
-            <div style={{
-              position: 'absolute', inset: 0, zIndex: 50,
-              background: '#1a0f07',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: '20px',
-            }}>
-              <p style={{
-                fontFamily: 'Georgia, serif',
-                color: 'rgba(240,232,213,0.5)',
-                fontSize: '12px', letterSpacing: '0.3em', textTransform: 'uppercase',
-              }}>
-                {isFallback ? 'Memuat tampilan…' : 'Memuat scene…'}
-              </p>
-              <div style={{
-                width: '140px', height: '1px',
-                background: 'rgba(200,134,10,0.2)',
-                position: 'relative', overflow: 'hidden',
-              }}>
-                <div style={{
-                  position: 'absolute', left: 0, top: 0, height: '100%',
-                  width: `${loadProgress * 100}%`,
-                  background: '#C8860A', transition: 'width 0.3s ease',
-                }} />
-              </div>
-            </div>
-          )}
 
           {/* Canvas */}
           <CinematicCanvas
