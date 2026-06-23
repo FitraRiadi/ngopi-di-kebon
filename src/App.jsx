@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
+import { useLenis } from 'lenis/react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -17,8 +18,23 @@ import WaButton from './components/WaButton'
 function App() {
   const [appReady, setAppReady] = useState(false)
   const [loadProgress, setLoadProgress] = useState(0)
+  const lenis = useLenis()
 
   const handleReady = useCallback(() => setAppReady(true), [])
+
+  useEffect(() => {
+    if (!appReady) {
+      document.body.style.overflow = 'hidden'
+      lenis?.stop()
+    } else {
+      document.body.style.overflow = ''
+      lenis?.start()
+    }
+    return () => {
+      document.body.style.overflow = ''
+      lenis?.start()
+    }
+  }, [appReady, lenis])
 
   return (
     <>
