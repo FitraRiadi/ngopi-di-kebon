@@ -385,19 +385,26 @@ class App {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     this.start = clientX;
+    this._lastX = clientX;          // track previous frame X for per-frame delta
     this._pointerDownX = clientX;
     this._pointerDownY = clientY;
   }
   onTouchMove(e) {
     if (!this.isDown) return;
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const isTouch = !!e.touches;
+    const x = isTouch ? e.touches[0].clientX : e.clientX;
+    const y = isTouch ? e.touches[0].clientY : e.clientY;
     const dx = Math.abs(x - this._pointerDownX);
     const dy = Math.abs(y - this._pointerDownY);
-    // consider it a drag if moved more than 6px
     if (dx > 6 || dy > 6) this._didDrag = true;
-    const distance = (this.start - x) * (this.scrollSpeed * 0.025);
-    this.scroll.target = this.scroll.position + distance;
+
+    // Use per-frame delta so the gallery tracks the finger 1:1
+    // Touch gets a higher multiplier for responsive feel on mobile;
+    // mouse keeps a smaller one to stay controlled.
+    const frameDelta = this._lastX - x;
+    const multiplier = isTouch ? 1.8 : 0.4;
+    this.scroll.target += frameDelta * multiplier;
+    this._lastX = x;
   }
   onTouchUp(e) {
     this.isDown = false;
