@@ -6,14 +6,23 @@ import { HiX } from 'react-icons/hi'
 
 gsap.registerPlugin(ScrollTrigger)
 
+const frameImages = import.meta.glob('/src/assets/cinematic-frame/*.webp', {
+  eager: true,
+  import: 'default',
+})
+const frameUrls = Object.values(frameImages)
+
 const galleryImages = [
-  { src: 'https://lh3.googleusercontent.com/grass-cs/ANxoTn1VoavQHAFgHOz90EPXCF_mbt-XLpWxW4w0XbSfX9BK6bbesaKH5MTlVpPUQJsD-7d0F0QidnIorhbA9zl8lPa8AeoVGo0nqxoFHTGdN9nsvaIGNaFqpQlv_cRIjJRHfWEDWzbmiiktJq0=k-no', alt: 'Taman dengan tempat duduk outdoor', span: 'md:row-span-2' },
-  { src: 'https://lh3.googleusercontent.com/grass-cs/ANxoTn3mv229i4rl48V0MYlaSZoKjWK1qZNuaT9Lk5z9IQu1hHhPWYuqxwGn-3vG6Vt38MwYoVm_sin7JwLIh4jUCvEmQ8Kgp420MTrE6xycuzuXQMV8OQTQpwZPH7wq7vte9k9JImHoKg=k-no', alt: 'Suasana sore di kebun', span: '' },
-  { src: 'https://lh3.googleusercontent.com/grass-cs/ANxoTn2VoMNiDiMmzrWDg3K-BUMX5h6Vn14JqM02LvjsFJqPbMpqsoSvchJs9BLJgrWS8phQ_h5lA0rZUSFDQrRkLeU-LpEHmMwV1lNR2PS0p1Kav1YW9oOgK6LG9tcwrWsWLaAl-yCRPA=k-no', alt: 'Area makan outdoor', span: '' },
-  { src: 'https://lh3.googleusercontent.com/grass-cs/ANxoTn1TwDNk9tvZ8vMn8ZGdlIkYiMFE_gHsZP3EYzPB6Q1pkV_14P-CKaFqN5GrMjqCAcvsMqB1dHcCetR6WldVbqRq-cH9JBtRYWwskDeIlsdo5inuuxWnRpinNIfsxT0k1vc0xbeC=k-no', alt: 'Pemandangan citylight Bandung', span: '' },
-  { src: 'https://lh3.googleusercontent.com/grass-cs/ANxoTn2CybniRbjgIqKaENJZK2KtuggSuuLOYkuYdXi8UcbBAXQ2OTUpu7x-SlX2uejD2AFpNyRvEVUJgnfRYatUNOeM1zPlb0ta-fke5_YNMqw3BYqiXDVuB_Q1s9IdtQ0oHbV6_j0Y7w=k-no', alt: 'Interior hangat kafe', span: 'md:row-span-2' },
-  { src: 'https://lh3.googleusercontent.com/grass-cs/ANxoTn0436DlcY8EUILYqcvd211y2GhoFX9MCFCpzHhC8Az2cC-YChPE1aJEDqxkdxvctpQT_rQpjySk1Gh3RSHG6-W7cuXs9NVYz6F-LkoPKjENnpe2JCC-P_Fo6ta0TzKXT6ibAe9i=k-no', alt: 'Hidangan spesial', span: '' },
-  { src: 'https://lh3.googleusercontent.com/grass-cs/ANxoTn2GtHI6zJ0revQ3oNqDOVsbH0qlbm-k3BBgjAuwd1D3XgdfEPLm6r4jZs_5j79G8B0Ka7Ge8sJett-q9Zhw7EXqDnzv8waPouYSkAud-lSnFPQaFi5SJAswl1ASkIxREy0B_gzr=k-no', alt: 'Pemandangan bukit Cimenyan', span: '' },
+  { src: frameUrls[0], alt: 'Suasana Ngopi Di Kebon', span: 'md:row-span-2' },
+  { src: frameUrls[1], alt: 'Taman dengan tempat duduk outdoor', span: '' },
+  { src: frameUrls[2], alt: 'Area makan outdoor', span: '' },
+  { src: frameUrls[3], alt: 'Pemandangan citylight Bandung', span: '' },
+  { src: frameUrls[4], alt: 'Interior hangat kafe', span: 'md:row-span-2' },
+  { src: frameUrls[5], alt: 'Hidangan spesial', span: '' },
+  { src: frameUrls[6], alt: 'Pemandangan bukit Cimenyan', span: '' },
+  { src: frameUrls[7], alt: 'Detail dekorasi kafe', span: '' },
+  { src: frameUrls[8], alt: 'Suasana sore di kebun', span: '' },
+  { src: frameUrls[9], alt: 'Pengalaman ngopi di kebun', span: '' },
 ]
 
 export default function Gallery() {

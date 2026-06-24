@@ -17,6 +17,12 @@ const highlights = [
   { icon: LuCircleCheck, label: 'Parkir Luas' },
 ]
 
+const aboutImages = import.meta.glob('/src/assets/cinematic-frame/*.webp', {
+  eager: true,
+  import: 'default',
+})
+const aboutImageUrls = Object.values(aboutImages)
+
 export default function About() {
   const sectionRef = useRef(null)
   const bgRef = useRef(null)
@@ -97,7 +103,7 @@ export default function About() {
           <div ref={leftRef} className="relative">
             <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-xl">
               <img
-                src="https://www.image2url.com/r2/default/images/1782160100703-4e08e96a-afbf-4b19-b376-fe7d01c9c321.jpg"
+                src={aboutImageUrls[0] || 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&q=80'}
                 alt="Ngopi Di Kebon garden atmosphere"
                 className="w-full h-full object-cover"
                 loading="lazy"

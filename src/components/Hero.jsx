@@ -9,7 +9,6 @@ gsap.registerPlugin(ScrollTrigger)
 
 // Daftar fallback images jika tidak ada gambar lokal di folder asset
 const FALLBACK_IMAGES = [
-  'https://www.image2url.com/r2/default/images/1782160242592-b0f3630c-7937-4235-bee9-efee8388f47a.webp',
   'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1920&q=85',
   'https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=1920&q=85',
   'https://images.unsplash.com/photo-1470338745628-171cf53de3a8?w=1920&q=85',
@@ -19,6 +18,7 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920&q=85',
   'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&q=85',
   'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1920&q=85',
+  'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1920&q=85',
 ]
 
 const SCENE_DOTS = [0, 0.12, 0.30, 0.54, 0.75, 0.92]
@@ -193,8 +193,13 @@ function useFrames() {
     
     try {
       // ✏️ Ganti '/src/assets/cinematic-frame' dengan folder kamu
-      const context = import.meta.glob('/src/assets/cinematic-frame/*.{jpg,jpeg,png,webp}', { eager: true })
-      localPaths = Object.keys(context).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+      const urls = import.meta.glob('/src/assets/cinematic-frame/*.{jpg,jpeg,png,webp}', {
+        eager: true,
+        import: 'default',
+      })
+      localPaths = Object.values(urls).sort((a, b) =>
+        a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+      )
     } catch (e) {
       localPaths = []
     }
@@ -208,7 +213,7 @@ function useFrames() {
       const results = new Array(totalToLoad)
       let loadedCount = 0
 
-      localPaths.forEach((path, index) => {
+      localPaths.forEach((url, index) => {
         const img = new Image()
         img.onload = () => {
           results[index] = img
@@ -225,7 +230,7 @@ function useFrames() {
             setIsLoaded(true)
           }
         }
-        img.src = path
+        img.src = url
       })
     } else {
       setIsFallback(true)
