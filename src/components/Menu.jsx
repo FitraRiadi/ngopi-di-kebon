@@ -101,6 +101,7 @@ export default function Menu() {
   const titleRef = useRef(null)
   const hintRef = useRef(null)
   const galleryRef = useRef(null)
+  const galleryWrapRef = useRef(null)
   const isMobile = useIsMobile()
 
   const handleItemClick = useCallback((i) => {
@@ -136,6 +137,21 @@ export default function Menu() {
           },
         }
       )
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 70%',
+          toggleActions: 'play none none reverse',
+        },
+      })
+      tl.fromTo(
+        galleryWrapRef.current,
+        { opacity: 0, y: 80, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'power3.out' }
+      )
+      for (let i = 0; i < 8; i++) {
+        tl.call(() => galleryRef.current?.next(), [], 0.15 * (i + 1))
+      }
     }, sectionRef)
     return () => ctx.revert()
   }, [])
@@ -195,7 +211,7 @@ export default function Menu() {
         </p>
 
         {/* ── CircularGallery ── */}
-        <div className="relative">
+        <div ref={galleryWrapRef} className="relative">
           <div
             className="relative rounded-3xl overflow-hidden"
             style={{ height: `${galleryHeight}px` }}

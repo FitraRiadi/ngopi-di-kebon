@@ -9,38 +9,28 @@ gsap.registerPlugin(ScrollTrigger)
 
 const activities = [
   {
-    icon: LuCoffee,
     title: 'Kelas Kopi',
     desc: 'Belajar menyeduh kopi ala barista profesional. Dari teknik pour-over hingga latte art, kami bimbing Anda dari nol.',
-    tag: 'Setiap Sabtu',
     image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&q=80',
   },
   {
-    icon: LuMusic,
     title: 'Live Akustik',
     desc: 'Nikmati alunan musik akustik setiap akhir pekan. Temukan suasana hangat ditemani lagu-lagu favorit Anda.',
-    tag: 'Jumat & Sabtu Malam',
     image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&q=80',
   },
   {
-    icon: LuCamera,
     title: 'Fotografi Senja',
     desc: 'Abadikan momen golden hour dengan latar pemandangan Bandung dari ketinggian. Spot foto terbaik menanti Anda.',
-    tag: 'Setiap Hari',
     image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=1200&q=80',
   },
   {
-    icon: LuUsers,
     title: 'Gathering Kebun',
     desc: 'Rayakan momen spesial bersama keluarga, teman, atau rekan kerja di tengah kebun yang asri dan menenangkan.',
-    tag: 'Reservasi',
     image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1200&q=80',
   },
   {
-    icon: LuSunset,
     title: 'Ngopi Senja',
     desc: 'Program spesial menikmati kopi favorit sambil menyaksikan matahari terbenam. Diskon khusus untuk pengunjung sore.',
-    tag: '15:00 - 17:00',
     image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1200&q=80',
   },
 ]
