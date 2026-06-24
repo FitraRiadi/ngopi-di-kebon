@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { motion } from 'framer-motion'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { HiX, HiChevronLeft, HiChevronRight } from 'react-icons/hi'
@@ -77,7 +77,7 @@ const galleryItems = [
 
 const circularItems = galleryItems.map((item) => ({
   image: item.image,
-  text: `${item.name}  •  IDR ${item.price}`,
+  text: `${item.name}`,
 }))
 
 const WA_NUMBER = '6285721611105'
@@ -102,6 +102,10 @@ export default function Menu() {
   const hintRef = useRef(null)
   const galleryRef = useRef(null)
   const isMobile = useIsMobile()
+
+  const handleItemClick = useCallback((i) => {
+    setSelectedItem(galleryItems[i])
+  }, [])
 
   const bend = isMobile ? 1 : 3
   const galleryHeight = isMobile ? 320 : 500
@@ -200,12 +204,12 @@ export default function Menu() {
               ref={galleryRef}
               items={circularItems}
               bend={bend}
-              textColor="#F5E6D3"
+              textColor="#472f0fd8"
               borderRadius={0.08}
               scrollSpeed={2}
               scrollEase={0.05}
               font={isMobile ? 'bold 16px serif' : 'bold 22px serif'}
-              onItemClick={(i) => setSelectedItem(galleryItems[i])}
+              onItemClick={handleItemClick}
             />
 
             <button
@@ -260,55 +264,45 @@ export default function Menu() {
       </div>
 
       {/* ── WhatsApp Modal ── */}
-      <AnimatePresence>
-        {selectedItem && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-            onClick={() => setSelectedItem(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.85, opacity: 0, y: 40 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.85, opacity: 0, y: 40 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-cream rounded-3xl overflow-hidden max-w-sm w-full shadow-2xl"
+      <div
+        className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all duration-300 ease-out ${selectedItem ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setSelectedItem(null)}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className={`bg-cream rounded-3xl overflow-hidden max-w-sm w-full shadow-2xl transition-all duration-300 ease-out ${selectedItem ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-8'}`}
+        >
+          <div className="relative aspect-[16/9] overflow-hidden">
+            <img src={selectedItem?.image} alt={selectedItem?.name} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            <button
+              onClick={() => setSelectedItem(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-black/30 hover:bg-black/50 text-cream transition-colors cursor-pointer"
             >
-              <div className="relative aspect-[16/9] overflow-hidden">
-                <img src={selectedItem.image} alt={selectedItem.name} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <button
-                  onClick={() => setSelectedItem(null)}
-                  className="absolute top-4 right-4 p-1.5 rounded-full bg-black/30 hover:bg-black/50 text-cream transition-colors cursor-pointer"
-                >
-                  <HiX size={20} />
-                </button>
-                <div className="absolute bottom-4 left-5">
-                  <h3 className="font-serif text-2xl font-bold text-cream">{selectedItem.name}</h3>
-                  <p className="text-gold font-semibold text-lg">IDR {selectedItem.price}</p>
-                </div>
-              </div>
-              <div className="p-6 space-y-4">
-                <p className="text-espresso-light text-sm leading-relaxed">{selectedItem.desc}</p>
-                <button
-                  onClick={() => openWA(selectedItem)}
-                  className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-semibold py-3.5 rounded-2xl transition-all duration-300 cursor-pointer shadow-lg shadow-green-600/25"
-                >
-                  <LuSend size={18} /> Pesan via WhatsApp
-                </button>
-                <button
-                  onClick={() => setSelectedItem(null)}
-                  className="w-full text-espresso-light text-sm hover:text-espresso transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <HiX size={20} />
+            </button>
+            <div className="absolute bottom-4 left-5">
+              <h3 className="font-serif text-2xl font-bold text-cream">{selectedItem?.name}</h3>
+              <p className="text-gold font-semibold text-lg">IDR {selectedItem?.price}</p>
+            </div>
+          </div>
+          <div className="p-6 space-y-4">
+            <p className="text-espresso-light text-sm leading-relaxed">{selectedItem?.desc}</p>
+            <button
+              onClick={() => openWA(selectedItem)}
+              className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-semibold py-3.5 rounded-2xl transition-all duration-300 cursor-pointer shadow-lg shadow-green-600/25"
+            >
+              <LuSend size={18} /> Pesan via WhatsApp
+            </button>
+            <button
+              onClick={() => setSelectedItem(null)}
+              className="w-full text-espresso-light text-sm hover:text-espresso transition-colors cursor-pointer"
+            >
+              Batal
+            </button>
+          </div>
+        </div>
+      </div>
     </section>
   )
 }
