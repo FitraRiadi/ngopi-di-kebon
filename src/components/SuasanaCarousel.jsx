@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import bgTexture from '../assets/suasana/suasana-1.jpg'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -43,7 +44,7 @@ export default function SuasanaCarousel() {
     }, sectionRef)
 
     // ── Carousel auto-scroll ──────────────────────────
-    const speed = 1.5 // ← ubah ini: kecil = lambat, besar = cepat
+    const speed = 1.5
 
     const tick = () => {
       const track = trackRef.current
@@ -62,7 +63,6 @@ export default function SuasanaCarousel() {
 
     rafRef.current = requestAnimationFrame(tick)
 
-    // Pause saat tab tidak aktif
     const handleVisibility = () => {
       if (document.hidden) {
         cancelAnimationFrame(rafRef.current)
@@ -83,23 +83,24 @@ export default function SuasanaCarousel() {
     <section
       id="suasana"
       ref={sectionRef}
-      className="relative py-16 sm:py-20 bg-espresso overflow-hidden"
+      className="relative py-16 sm:py-20 bg-cream overflow-hidden"
     >
       <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1498804103079-a6351b050096?w=1600&q=80")',
+          backgroundImage: `url(${bgTexture})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          opacity: 0.7,
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-espresso via-transparent to-espresso pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-cream via-transparent to-cream pointer-events-none" />
 
       <div ref={titleRef} className="relative text-center mb-10 px-4">
-        <span className="text-gold font-medium text-sm tracking-[0.2em] uppercase">
+        <span className="text-forest font-medium text-sm tracking-[0.2em] uppercase">
           Suasana
         </span>
-        <h2 className="font-serif text-3xl sm:text-4xl text-cream font-bold mt-2">
+        <h2 className="font-serif text-3xl sm:text-4xl text-espresso font-bold mt-2">
           Ngopi Di Kebon
         </h2>
       </div>
