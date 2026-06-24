@@ -12,6 +12,12 @@ const frameImages = import.meta.glob('/src/assets/cinematic-frame/*.webp', {
 })
 const frameUrls = Object.values(frameImages)
 
+const suasanaImages = import.meta.glob('/src/assets/suasana/*.jpg', {
+  eager: true,
+  import: 'default',
+})
+const suasanaUrls = Object.values(suasanaImages)
+
 const galleryImages = [
   { src: frameUrls[0], alt: 'Suasana Ngopi Di Kebon', span: 'md:row-span-2' },
   { src: frameUrls[1], alt: 'Taman dengan tempat duduk outdoor', span: '' },
@@ -21,8 +27,11 @@ const galleryImages = [
   { src: frameUrls[5], alt: 'Hidangan spesial', span: '' },
   { src: frameUrls[6], alt: 'Pemandangan bukit Cimenyan', span: '' },
   { src: frameUrls[7], alt: 'Detail dekorasi kafe', span: '' },
-  { src: frameUrls[8], alt: 'Suasana sore di kebun', span: '' },
-  { src: frameUrls[9], alt: 'Pengalaman ngopi di kebun', span: '' },
+  ...suasanaUrls.map((src, i) => ({
+    src,
+    alt: `Suasana Ngopi Di Kebon ${i + 1}`,
+    span: '',
+  })),
 ]
 
 export default function Gallery() {
